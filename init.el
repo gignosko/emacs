@@ -38,8 +38,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(command-log-mode elixir-ts-mode evil exec-path-from-shell ivy
-		      lsp-mode projectile rainbow-delimiters ts-fold)))
+   '(command-log-mode elixir-ts-mode evil exec-path-from-shell general
+		      ivy lsp-mode projectile rainbow-delimiters
+		      ts-fold)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -94,7 +95,12 @@
   :hook (ruby-mode . eglot-ensure))
 
 
-(which-key-mode)
+(use-package which-key
+  :demand
+  :init
+  (setq which-key-idle-delay 0.5) ; Open after .5s instead of 1s
+  :config
+  (which-key-mode))
 
 
 ;; TODO
@@ -107,13 +113,47 @@
 ;; +projectile
 ;; To add a project to Projectile’s list of known projects, open a file in the project.
 ;; Add a project: M-x projectile-discover-projects-in-search-path
-(use-package projectile
-  :ensure t
-  :init
-  (setq projectile-project-search-path '("~/dev/elixir/" "~/dev/python/" ("~/dev/ruby/" . 1)))
-  (setq projectile-completion-system 'ivy)
+
+
+
+(use-package general
+  :demand
   :config
-  ;; I typically use this keymap prefix on macOS
-  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-  (global-set-key (kbd "C-c p") 'projectile-command-map)
+  (general-evil-setup)
+
+  (general-create-definer leader-keys
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (leader-keys
+    "x" '(execute-extended-command :which-key "execute command")
+    "r" '(restart-emacs :which-key "restart emacs")
+    "i" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
+
+    ;; Buffer
+    "b" '(:ignore t :which-key "buffer")
+    ;; Don't show an error because SPC b ESC is undefined, just abort
+    "b <escape>" '(keyboard-escape-quit :which-key t)
+    "bd"  'kill-current-buffer
+  ))
+
+(use-package projectile
+  :demand
+  :general
+  (leader-keys
+    :states 'normal
+    "SPC" '(projectile-find-file :which-key "find file")
+
+    ;; Buffers
+    "b b" '(projectile-switch-to-buffer :which-key "switch buffer")
+
+    ;; Projects
+    "p" '(:ignore t :which-key "projects")
+    "p <escape>" '(keyboard-escape-quit :which-key t)
+    "p p" '(projectile-switch-project :which-key "switch project")
+    "p a" '(projectile-add-known-project :which-key "add project")
+    "p r" '(projectile-remove-known-project :which-key "remove project"))
+  :init
   (projectile-mode +1))
