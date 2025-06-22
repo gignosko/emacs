@@ -37,11 +37,14 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+
+ ;; M-x package-install-selected-packages to install these.
  '(package-selected-packages
-  '(command-log-mode diff-hl doom-modeline doom-themes elixir-ts-mode
-                      evil evil-collection evil-nerd-commenter
-                      exec-path-from-shell general ivy lsp-mode magit
-                      projectile rainbow-delimiters ts-fold vterm
+   '(command-log-mode company counsel diff-hl doom-modeline doom-themes
+                      elixir-ts-mode evil-collection
+                      evil-nerd-commenter exec-path-from-shell general
+                      ivy lsp-mode magit minitest projectile
+                      python-mode rainbow-delimiters swiper-helm
                       vterm-toggle)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -105,21 +108,35 @@
   :config
   (load-theme 'doom-challenger-deep t))
 
-(use-package eglot
-  :ensure t
-  :hook (ruby-mode . eglot-ensure))
+;; (use-package eglot
+;;   :ensure t
+;;   :hook (ruby-mode . eglot-ensure))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  (add-to-list 'exec-path "~/bin/elixirls")
+  :config
+  (lsp-enable-which-key-integration t))
 
 ;; (with-eval-after-load 'eglot
 ;;  (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "ruby-lsp")))
 
-;; (use-package elixir-ts-mode
-;;   :ensure t
-;;   :hook (elixir-ts-mode . lsp))
+(use-package elixir-ts-mode
+  :ensure t
+  :mode (("\\.ex\\'" . elixir-ts-mode)
+         ("\\.exs\\'" . elixir-ts-mode)
+         ("\\mix.lock\\'" . elixir-ts-mode))
+  :hook (elixir-ts-mode . lsp))
 
 (use-package ruby-mode
   :ensure t
-  :hook (ruby-mode . eglot-ensure))
+  :hook (ruby-mode . lsp))
 
+(use-package python-mode
+  :ensure t
+  :hook (python-mode . lsp))
 
 (use-package which-key
   :demand
@@ -153,6 +170,8 @@
     :prefix "SPC"
     :global-prefix "C-SPC")
 
+    ;; Some bindinfs are set here, some are set in setup for the ext, i.e., projectile
+    ;; I don't like that, I might consolidate.  
   (leader-keys
     "x" '(execute-extended-command :which-key "execute command")
     "r" '(restart-emacs :which-key "restart emacs")
@@ -163,6 +182,9 @@
     ;; Don't show an error because SPC b ESC is undefined, just abort
     "b <escape>" '(keyboard-escape-quit :which-key t)
     "bd"  'kill-current-buffer
+    "b b" '(counsel-switch-buffer :which-key "switch buffer")
+    "a" '(comment-or-uncomment-region :which-key "toggle comment")
+    "f" '(counsel-find-file :which-key "find-file")
   ))
 
 (use-package projectile
@@ -170,10 +192,7 @@
   :general
   (leader-keys
     :states 'normal
-    "SPC" '(projectile-find-file :which-key "find file")
-
     ;; Buffers
-    "b b" '(projectile-switch-to-buffer :which-key "switch buffer")
 
     ;; Projects
     "p" '(:ignore t :which-key "projects")
