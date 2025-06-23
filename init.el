@@ -8,8 +8,6 @@
 (menu-bar-mode -1)
 (electric-pair-mode)
 (desktop-save-mode 1)
-(when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize))
 
 ;; On mac this shows an annoying visual caution triangle. 
 (setq visible-bell nil)
@@ -29,9 +27,6 @@
 ;; to run this:
 ;; M-x command-log-mode or global-command-line-mode
 ;; M-x clm/toggle-command-log-buffer 
-(use-package command-log-mode)
-(use-package ivy
-  )
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -52,6 +47,13 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+(use-package command-log-mode)
+(use-package ivy
+  )
+
 (use-package emacs
   :init
  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
