@@ -7,7 +7,7 @@
 (set-fringe-mode 10)
 (menu-bar-mode -1)
 (electric-pair-mode)
-(desktop-save-mode 1)
+;; (desktop-save-mode 1)
 
 ;; On mac this shows an annoying visual caution triangle. 
 (setq visible-bell nil)
@@ -32,15 +32,13 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
-
- ;; M-x package-install-selected-packages to install these.
  '(package-selected-packages
    '(command-log-mode company counsel diff-hl doom-modeline doom-themes
                       elixir-ts-mode evil-collection
                       evil-nerd-commenter exec-path-from-shell general
-                      ivy lsp-mode magit minitest projectile
-                      python-mode rainbow-delimiters swiper-helm
-                      vterm-toggle)))
+                      ivy lsp-mode magit minitest org-roam org-roam-ui
+                      projectile python-mode rainbow-delimiters
+                      swiper-helm vterm-toggle)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -48,8 +46,10 @@
  ;; If there is more than one, they won't work right.
  )
 
+;; Emacs on Mac has a hard time reading the PATH, I guess?
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
+
 (use-package command-log-mode)
 (use-package ivy
   )
@@ -176,7 +176,6 @@
     ;; I don't like that, I might consolidate.  
   (leader-keys
     "x" '(execute-extended-command :which-key "execute command")
-    "r" '(restart-emacs :which-key "restart emacs")
     "i" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
 
     ;; Buffer
@@ -187,6 +186,17 @@
     "b b" '(counsel-switch-buffer :which-key "switch buffer")
     "a" '(comment-or-uncomment-region :which-key "toggle comment")
     "f" '(counsel-find-file :which-key "find-file")
+    ;; Roam
+    "r" '(:ignore t :which-key "roam")
+    "r t" '(org-roam-buffer-toggle :which-key "buffer toggle")
+    "r f" '(org-roam-node-find :which-key "node find")
+    "r i" '(org-roam-node-insert :which-key "node-insert")
+    ;; org-mode
+    "o" '(:ignore t :which-key "org-mode")
+    "o <escape>" '(keyboard-escape-quit)
+    "o l" '(org-store-link :which-key "store link")
+    "o a" '(org-agenda :which-key "agenda")
+    "o c" '(org-capture :which-key "capture")
   ))
 
 (use-package projectile
@@ -244,3 +254,52 @@
   :general
   (general-nvmap
     "gc" 'evilnc-comment-operator))
+
+
+;; Org mode
+(use-package org)
+
+;; Must do this so the agenda knows where to look for my files
+(setq org-agenda-files '("~/org"))
+
+;; When a TODO is set to a done state, record a timestamp
+(setq org-log-done 'time)
+
+;; Follow the links
+(setq org-return-follows-link  t)
+
+;; Associate all org files with org mode
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+
+;; Make the indentation look nicer
+(add-hook 'org-mode-hook 'org-indent-mode)
+
+;; Remap the change priority keys to use the UP or DOWN key
+(define-key org-mode-map (kbd "C-c <up>") 'org-priority-up)
+(define-key org-mode-map (kbd "C-c <down>") 'org-priority-down)
+
+;; Shortcuts for storing links, viewing the agenda, and starting a capture
+
+;; When you want to change the level of an org item, use SMR
+(define-key org-mode-map (kbd "C-c C-g C-r") 'org-shiftmetaright)
+
+;; Hide the markers so you just see bold text as BOLD-TEXT and not *BOLD-TEXT*
+(setq org-hide-emphasis-markers t)
+
+;; Wrap the lines in org mode so that things are easier to read
+(add-hook 'org-mode-hook 'visual-line-mode)
+
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+datetree "~/org/journal.org")
+         "* %?\nEntered on %U\n  %i\n  %a")))
+(setq org-refile-targets '((org-agenda-files . (:maxlevel . 6))))
+
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory "~/org/roam")
+  
+  :config
+  (org-roam-setup))
