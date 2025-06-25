@@ -178,7 +178,7 @@
     "x" '(execute-extended-command :which-key "execute command")
     "i" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
 
-    ;; Buffer
+    ;; ====================== Buffer ======================
     "b" '(:ignore t :which-key "buffer")
     ;; Don't show an error because SPC b ESC is undefined, just abort
     "b <escape>" '(keyboard-escape-quit :which-key t)
@@ -186,12 +186,12 @@
     "b b" '(counsel-switch-buffer :which-key "switch buffer")
     "a" '(comment-or-uncomment-region :which-key "toggle comment")
     "f" '(counsel-find-file :which-key "find-file")
-    ;; Roam
+    ;; ====================== Roam ======================
     "r" '(:ignore t :which-key "roam")
     "r t" '(org-roam-buffer-toggle :which-key "buffer toggle")
     "r f" '(org-roam-node-find :which-key "node find")
     "r i" '(org-roam-node-insert :which-key "node-insert")
-    ;; org-mode
+    ;; ====================== org-mode ======================
     "o" '(:ignore t :which-key "org-mode")
     "o <escape>" '(keyboard-escape-quit)
     "o l" '(org-store-link :which-key "store link")
@@ -294,7 +294,7 @@
          "* TODO %?\n  %i\n  %a")
         ("j" "Journal" entry (file+datetree "~/org/journal.org")
          "* %?\nEntered on %U\n  %i\n  %a")))
-(setq org-refile-targets '((org-agenda-files . (:maxlevel . 6))))
+(setq org-refile-targets '((org-agenda-files . (:maxlevel . 3))))
 
 (use-package org-roam
   :ensure t
