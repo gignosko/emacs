@@ -33,12 +33,11 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(command-log-mode company counsel diff-hl doom-modeline doom-themes
-                      elixir-ts-mode evil-collection
-                      evil-nerd-commenter exec-path-from-shell general
-                      ivy lsp-mode magit minitest org-roam org-roam-ui
-                      projectile python-mode rainbow-delimiters
-                      swiper-helm vterm-toggle)))
+   '(ag command-log-mode company counsel diff-hl doom-modeline
+        doom-themes elixir-ts-mode evil-collection evil-nerd-commenter
+        exec-path-from-shell general ivy lsp-mode magit minitest
+        org-roam org-roam-ui projectile projectile-ripgrep python-mode
+        rainbow-delimiters ripgrep swiper-helm vterm-toggle)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -52,7 +51,8 @@
 
 (use-package command-log-mode)
 (use-package ivy
-  )
+  :config
+  (ivy-mode 1))
 
 (use-package emacs
   :init
@@ -80,11 +80,14 @@
   (add-hook 'prog-mode-hook #'ab/enable-line-numbers)
   )
 
+(require 'project)
+
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1))
 
-(use-package nerd-icons)
+(use-package nerd-icons
+  :ensure t)
 
 (use-package rainbow-delimiters
   :ensure
@@ -118,7 +121,7 @@
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-  (add-to-list 'exec-path "~/bin/elixirls")
+  (add-to-list 'exec-path "~/bin/elixir-ls")
   :config
   (lsp-enable-which-key-integration t))
 
@@ -179,6 +182,7 @@
     "i" '((lambda () (interactive) (find-file user-init-file)) :which-key "open init file")
 
     ;; ====================== Buffer ======================
+    "<tab>" '(previous-buffer :which-key "prev buffer")
     "b" '(:ignore t :which-key "buffer")
     ;; Don't show an error because SPC b ESC is undefined, just abort
     "b <escape>" '(keyboard-escape-quit :which-key t)
@@ -186,6 +190,11 @@
     "b b" '(counsel-switch-buffer :which-key "switch buffer")
     "a" '(comment-or-uncomment-region :which-key "toggle comment")
     "f" '(counsel-find-file :which-key "find-file")
+    ;; ====================== Search ====================
+    "s g" '(projectile-grep :which-key "grep")
+    "s r" '(projectile-ripgrep :which-key "rip-grep")
+    ;; ====================== LSP =======================
+    "l d" '(lsp-find-definition :which-key "find definition")
     ;; ====================== Roam ======================
     "r" '(:ignore t :which-key "roam")
     "r t" '(org-roam-buffer-toggle :which-key "buffer toggle")
@@ -211,8 +220,12 @@
     "p <escape>" '(keyboard-escape-quit :which-key t)
     "p p" '(projectile-switch-project :which-key "switch project")
     "p a" '(projectile-add-known-project :which-key "add project")
+    "p m" '(projectile-command-map :which-key "command map")
     "p r" '(projectile-remove-known-project :which-key "remove project"))
   :init
+  (setq projectile-project-search-path '("~/dev/apps/"))
+  (setq projectile-switch-project-action 'projectile-dired)
+  :config
   (projectile-mode +1))
 
 
